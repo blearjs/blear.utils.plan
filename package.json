@@ -36,8 +36,10 @@
   },
   "dependencies": {},
   "peerDependencies": {
-    "blear.utils.url": "1.x",
-    "blear.utils.querystring": "1.x"
+    "blear.utils.typeis": "1.x",
+    "blear.utils.collection": "1.x",
+    "blear.utils.time": "1.x",
+    "blear.utils.access": "1.x"
   },
   "devDependencies": {
     "jasmine-core": "^2.4.1",
