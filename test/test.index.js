@@ -28,7 +28,7 @@ describe('index.js', function () {
         };
     };
 
-    it('.follow', function (done) {
+    it('#follow', function (done) {
         howdo
             .task(asyncFollow(1, 1))
             .task(asyncFollow(2, 2))
@@ -49,7 +49,7 @@ describe('index.js', function () {
             });
     });
 
-    it('.together', function (done) {
+    it('#together', function (done) {
         howdo
             .task(asyncTogether(1, 1))
             .task(asyncTogether(2, 2))
@@ -74,7 +74,7 @@ describe('index.js', function () {
             })
     });
 
-    it('.each:array.follow', function (done) {
+    it('#each:array.follow', function (done) {
         howdo
             .each([1, 2, 3], function (index, val, next) {
                 asyncFollow(index, val)(next);
@@ -88,7 +88,7 @@ describe('index.js', function () {
             });
     });
 
-    it('.each:object.follow', function (done) {
+    it('#each:object.follow', function (done) {
         howdo
             .each({
                 a: 1,
@@ -106,7 +106,7 @@ describe('index.js', function () {
             });
     });
 
-    it('.each:array.together', function (done) {
+    it('#each:array.together', function (done) {
         howdo
             .each([1, 2, 3], function (index, val, next) {
                 asyncFollow(index, val)(next);
@@ -122,7 +122,7 @@ describe('index.js', function () {
             });
     });
 
-    it('.each:object.follow', function (done) {
+    it('#each:object.follow', function (done) {
         howdo
             .each({
                 a: 1,
@@ -154,7 +154,7 @@ describe('index.js', function () {
         expect(called).toEqual(true);
     });
 
-    it('follow twice', function (done) {
+    it('#follow twice', function (done) {
         var called = false;
         try {
             howdo.task(function (next) {
@@ -170,8 +170,7 @@ describe('index.js', function () {
         }, 100);
     });
 
-
-    it('together twice', function (done) {
+    it('#together twice', function (done) {
         var called = false;
         try {
             howdo.task(function (next) {
@@ -187,7 +186,7 @@ describe('index.js', function () {
         }, 100);
     });
 
-    it('follow error', function (done) {
+    it('#follow error', function (done) {
         howdo.task(function (next) {
             next(1);
         }).follow(function (err) {
@@ -198,7 +197,7 @@ describe('index.js', function () {
         });
     });
 
-    it('together error', function (done) {
+    it('#together error', function (done) {
         howdo.task(function (next) {
             setTimeout(function () {
                 next(1);
@@ -211,5 +210,17 @@ describe('index.js', function () {
             expect(Boolean(err)).toEqual(true);
             done();
         });
+    });
+
+    it('#follow each empty', function (done) {
+        howdo.each([], function () {
+            // empty
+        }).follow(done);
+    });
+
+    it('#together each empty', function (done) {
+        howdo.each([], function () {
+            // empty
+        }).together(done);
     });
 });

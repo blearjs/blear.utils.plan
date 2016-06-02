@@ -189,6 +189,13 @@ Howdo.prototype = {
         var tasks = the.tasks;
         var count = tasks.length;
         var args = [];
+        
+        if(!count) {
+            nextTick(function () {
+                the._fixCallback.apply(the, []);
+            });
+            return the;
+        }
 
         nextTick(function () {
             (function _follow() {
@@ -225,23 +232,23 @@ Howdo.prototype = {
      * @example
      * howdo
      * .task(function(done){
-         *     done(null, 1);
-         * })
+     *     done(null, 1);
+     * })
      * .task(function(done){
-         *     done(null, 2, 3);
-         * })
+     *     done(null, 2, 3);
+     * })
      * .task(function(done){
-         *     done(null, 4, 5, 6);
-         * })
+     *     done(null, 4, 5, 6);
+     * })
      * .together(function(err, data1, data2, data3, data4, data5, data6){
-         *     // err = null
-         *     // data1 = 1
-         *     // data2 = 2
-         *     // data3 = 3
-         *     // data4 = 4
-         *     // data5 = 5
-         *     // data6 = 6
-         * });
+     *     // err = null
+     *     // data1 = 1
+     *     // data2 = 2
+     *     // data3 = 3
+     *     // data4 = 4
+     *     // data5 = 5
+     *     // data6 = 6
+     * });
      */
     together: function (callback) {
         var the = this;
@@ -263,6 +270,13 @@ Howdo.prototype = {
         var taskData = [];
         var hasCallback = false;
         var i = 0;
+
+        if(!count) {
+            nextTick(function () {
+                the._fixCallback.apply(the, []);
+            });
+            return the;
+        }
 
         nextTick(function () {
             for (; i < count; i++) {
