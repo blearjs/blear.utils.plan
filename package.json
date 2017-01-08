@@ -36,10 +36,11 @@
     "url": "https://github.com/blearjs/blear.utils.howdo/issues"
   },
   "dependencies": {
-    "blear.utils.typeis": "1.x",
+    "blear.classes.events": "^1.0.6",
+    "blear.utils.access": "1.x",
     "blear.utils.collection": "1.x",
     "blear.utils.time": "1.x",
-    "blear.utils.access": "1.x"
+    "blear.utils.typeis": "1.x"
   },
   "peerDependencies": {},
   "devDependencies": {
