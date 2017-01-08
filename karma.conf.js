@@ -89,7 +89,7 @@ module.exports = function (config) {
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors: {
             // 原始模块，需要测试覆盖率
-            './src/index.js': ['coverage']
+            './src/**/*.js': ['coverage']
         },
 
 

@@ -1,17 +1,8 @@
 'use strict';
 
-// 当前 website 的 port
-var WEBSITE_PROT = 10000;
-
-//  Browser-sync 启动的端口
-var BROWSER_SYNC_MAIN_PORT = WEBSITE_PROT++;
-
-// Browser-sync ui 端口
-var BROWSER_SYNC_UI_PORT = WEBSITE_PROT++;
-
-// weinre 端口
-var BROWSER_SYNC_WEINRE_PORT = WEBSITE_PROT++;
-
+var UI_PORT = 10000;
+var WEINRE_PORT = UI_PORT + 1;
+var BROWSER_SYNC_PORT = UI_PORT + 1;
 
 /*
  |--------------------------------------------------------------------------
@@ -28,20 +19,20 @@ var BROWSER_SYNC_WEINRE_PORT = WEBSITE_PROT++;
  */
 module.exports = {
     "ui": {
-        "port": BROWSER_SYNC_UI_PORT,
+        "port": UI_PORT,
         "weinre": {
-            "port": BROWSER_SYNC_WEINRE_PORT
+            "port": WEINRE_PORT
         }
     },
     "files": [
-        './webroot-dev/static/**',
-        './webroot-dev/.views/**',
-        './webserver/**'
+        './example/**'
     ],
     "watchOptions": {},
-    "server": false,
-    "proxy": EXPRESS_URL,
-    "port": BROWSER_SYNC_MAIN_PORT,
+    "server": {
+        baseDir: "./"
+    },
+    "proxy": false,
+    "port": BROWSER_SYNC_PORT,
     "middleware": false,
     "serveStatic": [],
     "ghostMode": {
