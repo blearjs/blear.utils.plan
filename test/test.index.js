@@ -7,5 +7,12 @@
 
 'use strict';
 
-var howdo = require('../src/index.js');
+describe('串行任务', function () {
+    // require('./serial/sync');
+    // require('./serial/async');
+});
+
+describe('并行任务', function () {
+    require('./parallel/async');
+});
 

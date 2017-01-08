@@ -21,6 +21,7 @@ var context = null;
 var nextTick = time.nextTick;
 var isFunction = typeis.Function;
 var each = collection.each;
+var filter = collection.filter;
 var accessArgs = access.args;
 var now = Date.now;
 // 任务状态：准备中
@@ -52,6 +53,7 @@ var Plan = Events.extend({
         the[_way] = WAY_UNDETERMINED;
         the[_tries] = [];
         the[_catches] = [];
+        the[_excludeMap] = {};
         the.name = new Date() + ' plan';
         the.context = context;
         the.error = null;
@@ -131,6 +133,7 @@ var Plan = Events.extend({
         var the = this;
 
         timeout = timeout || 1;
+        the[_excludeMap][the[_taskList].length] = 1;
 
         return the[_pushTask](false, 'wait ' + timeout + 'ms', function (next/*...*/) {
             var args = accessArgs(arguments).slice(1);
@@ -177,7 +180,7 @@ var Plan = Events.extend({
 
                     if (typeof DEBUG !== 'undefined' && DEBUG) {
                         throw new SyntaxError(
-                            task.name + '任务被重复完成，请检查。'
+                            '`' + task.name + '` 任务被重复完成，请检查。'
                         );
                     }
 
@@ -230,10 +233,25 @@ var Plan = Events.extend({
         // 合并的结果
         var combinedRet = [];
         var successLength = 0;
+        var waitLen = 0;
 
-        each(the[_taskList], function (index, task) {
-            nextTick(function () {
-                task.call(the.context, function (err, ret) {
+        nextTick(function () {
+            each(the[_taskList], function (index, task) {
+                // if (task.wait) {
+                //     waitLen++;
+                // }
+                //
+                // var retIndex = index - waitLen;
+                // console.log(task);
+                // console.log(
+                //     'index=', index,
+                //     'waitLen=', waitLen,
+                //     'retIndex=', retIndex,
+                //     'isWait', task.wait,
+                //     'combinedRet=', combinedRet
+                // );
+
+                task.will().call(the.context, function (err, ret) {
                     // 如果有任务已经出错
                     if (the.error) {
                         return;
@@ -247,7 +265,7 @@ var Plan = Events.extend({
 
                         if (typeof DEBUG !== 'undefined' && DEBUG) {
                             throw new SyntaxError(
-                                task.name + '被重复完成，请检查。'
+                                '`' + task.name + '` 任务被重复完成，请检查。'
                             );
                         }
 
@@ -258,10 +276,14 @@ var Plan = Events.extend({
                     combinedRet[index] = ret;
 
                     if (successLength === the.length) {
+                        combinedRet = filter(combinedRet, function (ret, index) {
+                            return !the[_excludeMap][index];
+                        });
                         combinedRet.unshift(null);
                         the[_planEnd].apply(the, combinedRet);
                     }
                 });
+                task.will = null;
             });
         });
 
@@ -313,7 +335,7 @@ var Plan = Events.extend({
         }
 
         the[_state] = STATE_DESTROYED;
-        the[_taskList] = the[_tries] = the[_catches] = the.context = null;
+        the[_taskList] = the[_tries] = the[_catches] = the.context = the[_excludeMap] = null;
         Plan.invoke('destroy', the);
     }
 });
@@ -328,6 +350,7 @@ var _taskStart = Plan.sole();
 var _taskEnd = Plan.sole();
 var _tries = Plan.sole();
 var _catches = Plan.sole();
+var _excludeMap = Plan.sole();
 var pro = Plan.prototype;
 
 pro[_pushTask] = function (sync, name, fn) {

@@ -53,18 +53,18 @@ var Task = Class.extend({
 
                 try {
                     // 同步任务不需要执行 next
-                    var ret = syncTask.call(plan.context, lastRet);
+                    var syncRet = syncTask.call(plan.context, lastRet);
 
                     nextArgs.push(null);
 
                     // 如果同步任务返回值为 undefined，
                     // 则将上一个任务的结果继续传下去
-                    if (ret === undefined) {
+                    if (syncRet === undefined) {
                         nextArgs.push(lastRet);
                     }
                     // 否则将同步结果传给下去
                     else {
-                        nextArgs.push(ret);
+                        nextArgs.push(syncRet);
                     }
                 } catch (err) {
                     nextArgs.push(err);
@@ -103,7 +103,8 @@ var Task = Class.extend({
      */
     copy: function () {
         var the = this;
-        var task = new Task(the.plan, the.sync, the.name, the.fn);
+        // 复制的时候，自我任务已经被转换成异步的了
+        var task = new Task(the.plan, false, the.name, the.fn);
 
         task.copied = the;
 

@@ -69,7 +69,7 @@ module.exports = function (config) {
             },
             {
                 // 加载 src 下的原始文件，但不直接引入，使用模块加载器引入
-                pattern: './test/test.**',
+                pattern: './test/**',
                 included: false
             },
             {

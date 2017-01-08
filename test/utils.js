@@ -8,79 +8,56 @@
 'use strict';
 
 var random = require('blear.utils.random');
+var time = require('blear.utils.time');
 
 
 /**
  * 生成一个异步任务
- * @param errType {Number} 错误类型，1=随机，2=无错误，2=有错误
+ * @param isError {Boolean} 是否出错
  * @param ret {Number}
  * @returns {Function}
  */
-exports.asyncTask = function (errType, ret) {
-    var timeout = random.number(10, 1000);
-    ret = ret || random.number(1, 100);
+exports.asyncTaskify = function (isError, ret) {
     var err = null;
 
-    switch (errType) {
-        case 1:
-            err = Math.random() > 0.5 ? new Error(ret) : null;
-            break;
-
-        case 2:
-            err = null;
-            break;
-
-        case 3:
-            err = new Error(ret);
-            break;
+    if (isError) {
+        err = new Error(
+            'error is ' + ret
+        );
     }
 
     return function (next, lastRet) {
-        setTimeout(function () {
+        time.nextTick(function () {
             if (err) {
                 return next(err);
             }
 
-            next(err, lastRet + ret);
-        }, timeout);
+            next(err, ret + (lastRet || 0));
+        });
     };
 };
 
 
 /**
  * 生成一个同步任务
- * @param errType {Number} 错误类型，1=随机，2=无错误，2=有错误
+ * @param isError {Boolean} 是否出错
  * @param ret {Number}
  * @returns {Function}
  */
-exports.syncTask = function (errType, ret) {
+exports.syncTaskify = function (isError, ret) {
     var err = null;
 
-    switch (errType) {
-        case 1:
-            err = Math.random() > 0.5 ? new Error(ret) : null;
-            break;
-
-        case 2:
-            err = null;
-            break;
-
-        case 3:
-            err = new Error(ret);
-            break;
+    if (isError) {
+        err = new Error(
+            'error is ' + ret
+        );
     }
 
     return function (lastRet) {
-        var length = random.number(1000, 100000);
-
-        while (length) {
-            new Date();
-        }
-
-        if(err) {
+        if (err) {
             throw err;
         }
 
-        return ret + lastRet;
+        return ret + (lastRet || 0);
     };
 };
