@@ -41,13 +41,13 @@
     "url": "https://github.com/blearjs/blear.utils.plan/issues"
   },
   "dependencies": {
-    "blear.classes.class": "^1.1.4",
+    "blear.classes.class": "1.x",
     "blear.classes.events": "1.x",
     "blear.utils.access": "1.x",
     "blear.utils.collection": "1.x",
-    "blear.utils.function": "^1.0.4",
-    "blear.utils.object": "^1.0.11",
-    "blear.utils.random": "^1.0.2",
+    "blear.utils.function": "1.x",
+    "blear.utils.object": "1.x",
+    "blear.utils.random": "1.x",
     "blear.utils.time": "1.x",
     "blear.utils.typeis": "1.x"
   },
