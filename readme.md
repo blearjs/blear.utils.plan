@@ -57,3 +57,15 @@ plan
         done();
     });
 ```
+
+# API
+## plan.task
+## plan.taskSync
+## plan.wait
+## plan.each
+## plan.is
+## plan.as
+## plan.serial
+## plan.parallel
+## plan.try
+## plan.catch
