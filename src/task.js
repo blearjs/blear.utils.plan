@@ -60,6 +60,19 @@ var Task = Class.extend({
 
                 next.apply(plan.context, nextArgs);
             };
+        } else {
+            // .task(function () {
+            //                ^^^^
+            //                此处没有显示 next
+            // })
+            if (fn.length === 0) {
+                throw new SyntaxError(
+                    '异步任务必须显式调用 `next`：\n' +
+                    'plan.task(function (next, prevRet) {\n' +
+                    '    next(err, ret);\n' +
+                    '})\n'
+                );
+            }
         }
 
         // 因为任务可以重复执行，所以这里以函数返回
@@ -93,9 +106,7 @@ var Task = Class.extend({
         var the = this;
         // 复制的时候，自我任务已经被转换成异步的了
         var task = new Task(the.plan, false, the.name, the.fn);
-
         task.copied = the;
-
         return task;
     },
 
@@ -104,7 +115,6 @@ var Task = Class.extend({
      */
     destroy: function () {
         var the = this;
-
         the.plan = the.fn = the.will = the.copied = the.context = null;
     }
 });

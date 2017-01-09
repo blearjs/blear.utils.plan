@@ -248,8 +248,21 @@ var Plan = Events.extend({
 
             the[_planStart]();
             each(the[_taskList], function (index, task) {
+                var done = false;
                 task = the[_taskStart](index);
                 task.will().call(the.context, function (err, ret) {
+                    if(done) {
+                        if (typeof DEBUG !== 'undefined' && DEBUG) {
+                            throw new SyntaxError(
+                                '`' + task.name + '` 任务被重复完成，请检查。'
+                            );
+                        }
+
+                        return;
+                    }
+
+                    done = true;
+
                     // 如果有任务已经出错
                     if (the.error) {
                         return;
@@ -259,17 +272,6 @@ var Plan = Events.extend({
                         the[_taskEnd](task, err);
                         the[_taskError](task, err);
                         return the[_planEnd](err);
-                    }
-
-                    if (combinedRet[index]) {
-
-                        if (typeof DEBUG !== 'undefined' && DEBUG) {
-                            throw new SyntaxError(
-                                '`' + task.name + '` 任务被重复完成，请检查。'
-                            );
-                        }
-
-                        return;
                     }
 
                     successLength++;
@@ -331,10 +333,6 @@ var Plan = Events.extend({
      */
     destroy: function () {
         var the = this;
-
-        if (the[_state] === STATE_DESTROYED) {
-            return;
-        }
 
         the[_state] = STATE_DESTROYED;
         the[_taskList] = the[_tries] = the[_catches] = the.context = the[_excludeMap] = null;

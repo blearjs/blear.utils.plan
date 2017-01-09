@@ -24,9 +24,12 @@ describe('事件', function () {
 describe('计划', function () {
     require('./plan/is');
     require('./plan/as');
+    require('./plan/parallel');
+    require('./plan/serial');
 });
 
 describe('边界', function () {
     require('./marginal/serial');
+    require('./marginal/parallel');
 });
 
