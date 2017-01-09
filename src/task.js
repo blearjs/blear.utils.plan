@@ -33,14 +33,26 @@ var Task = Class.extend({
         if (!isFunction(fn)) {
 
             if (typeof DEBUG !== 'undefined' && DEBUG) {
-                throw new SyntaxError(
-                    '`#task([name], fn)`：`fn` 必须为异步函数，例如：\n' +
-                    '#task("my task", function (next) {\n' +
-                    '   setTimeout(function () {\n' +
-                    '       next();\n' +
-                    '    }, 1000);\n' +
-                    '})\n'
-                );
+                var errMsg = '`#task([name], fn)`：`fn` 必须为同、异步函数，例如：\n';
+
+                if (sync) {
+                    errMsg += '// 同步\n' +
+                        '`#taskSync([name], fn)`：`fn` 必须为同、异步函数，例如：\n' +
+                        '#taskSync("my task", function () {\n' +
+                        '   ... balabala ...\n' +
+                        '   return bala;\n' +
+                        '})\n';
+                } else {
+                    errMsg += '// 异步\n' +
+                        '#task("my task", function (next) {\n' +
+                        '   ... balabala ...\n' +
+                        '   setTimeout(function () {\n' +
+                        '       next(new Error(bala), bala);\n' +
+                        '    });\n' +
+                        '})\n\n';
+                }
+
+                throw new SyntaxError(errMsg);
             }
 
             return the;

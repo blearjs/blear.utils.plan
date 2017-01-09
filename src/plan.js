@@ -155,6 +155,10 @@ var Plan = Events.extend({
     serial: function (callback) {
         var the = this;
 
+        if (!the.length) {
+            return the;
+        }
+
         if (the[_state] > STATE_READY) {
 
             if (typeof DEBUG !== 'undefined' && DEBUG) {
@@ -227,6 +231,10 @@ var Plan = Events.extend({
     parallel: function (callback) {
         var the = this;
 
+        if (!the.length) {
+            return the;
+        }
+
         if (the[_state] > STATE_READY) {
 
             if (typeof DEBUG !== 'undefined' && DEBUG) {
@@ -251,7 +259,7 @@ var Plan = Events.extend({
                 var done = false;
                 task = the[_taskStart](index);
                 task.will().call(the.context, function (err, ret) {
-                    if(done) {
+                    if (done) {
                         if (typeof DEBUG !== 'undefined' && DEBUG) {
                             throw new SyntaxError(
                                 '`' + task.name + '` 任务被重复完成，请检查。'
@@ -370,6 +378,10 @@ pro[_pushTask] = function (sync, name, fn) {
     }
 
     var task = new Task(the, sync, name, fn);
+
+    if (!task.will) {
+        return the;
+    }
 
     the[_taskList].push(task);
     the.length++;

@@ -170,5 +170,26 @@ describe('并行', function () {
             done();
         });
     });
+
+    it('非函数任务 DEBUG=true', function () {
+        expect(function () {
+            plan.task().parallel();
+        }).toThrowError();
+        expect(function () {
+            plan.taskSync().parallel();
+        }).toThrowError();
+    });
+
+    it('非函数任务 DEBUG=false', function (done) {
+        window.DEBUG = false;
+        var called = false;
+        plan.task().parallel(function () {
+            called = true;
+        });
+        plan.wait(10).taskSync(function () {
+            window.DEBUG = true;
+            expect(called).toBeFalsy();
+        }).serial(done);
+    });
 });
 

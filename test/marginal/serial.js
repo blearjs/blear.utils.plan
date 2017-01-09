@@ -143,5 +143,26 @@ describe('串行', function () {
         }).toThrowError();
     });
 
+    it('非函数任务 DEBUG=true', function () {
+        expect(function () {
+            plan.task().serial();
+        }).toThrowError();
+        expect(function () {
+            plan.taskSync().serial();
+        }).toThrowError();
+    });
+
+    it('非函数任务 DEBUG=false', function (done) {
+        window.DEBUG = false;
+        var called = false;
+        plan.task().serial(function () {
+            called = true;
+        });
+        plan.wait(10).taskSync(function () {
+            window.DEBUG = true;
+            expect(called).toBeFalsy();
+        }).serial(done);
+    });
+
 });
 
