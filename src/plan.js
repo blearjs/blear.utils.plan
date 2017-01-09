@@ -153,9 +153,10 @@ var Plan = Events.extend({
 
     /**
      * 串行执行
+     * @param [callback] {Function} 执行完回调
      * @returns {Plan}
      */
-    serial: function () {
+    serial: function (callback) {
         var the = this;
 
         if (the[_state] > STATE_READY) {
@@ -169,54 +170,64 @@ var Plan = Events.extend({
             return the;
         }
 
-        the[_planStart]();
+        the.try(callback);
+        the.catch(callback);
+        nextTick(function () {
+            the[_planStart]();
 
-        var start = function (lastRet) {
-            // 从计划列表中取出将要执行的计划
-            var task = the[_taskStart](the[_current]);
-            var done = false;
-            var next = function (err, lastRet) {
-                if (done) {
+            var start = function (lastRet) {
+                // 从计划列表中取出将要执行的计划
+                var task = the[_taskStart](the[_current]);
+                var done = false;
+                var next = function (err, lastRet) {
+                    if (done) {
 
-                    if (typeof DEBUG !== 'undefined' && DEBUG) {
-                        throw new SyntaxError(
-                            '`' + task.name + '` 任务被重复完成，请检查。'
-                        );
+                        if (typeof DEBUG !== 'undefined' && DEBUG) {
+                            throw new SyntaxError(
+                                '`' + task.name + '` 任务被重复完成，请检查。'
+                            );
+                        }
+
+                        return;
                     }
 
-                    return;
-                }
+                    done = true;
+                    the[_current]++;
 
-                done = true;
-                the[_taskEnd](the[_current]);
-                the[_current]++;
+                    // 串行任务，其中一个出错即中断
+                    if (err) {
+                        the[_taskEnd](task, err);
+                        the[_taskError](task, err);
+                        return the[_planEnd](err);
+                    }
 
-                // 串行任务，其中一个出错即中断
-                if (err) {
-                    return the[_planEnd](err);
-                }
+                    the[_taskEnd](task, err, lastRet);
+                    the[_taskSuccess](task, lastRet);
 
-                // 所有任务都执行完毕
-                if (the[_current] === the.length) {
-                    the[_planEnd](err, lastRet);
-                } else {
-                    start(lastRet);
-                }
+                    // 所有任务都执行完毕
+                    if (the[_current] === the.length) {
+                        the[_planEnd](err, lastRet);
+                    } else {
+                        start(lastRet);
+                    }
+                };
+
+                task.will().call(the.context, next, lastRet);
+                task.will = null;
             };
 
-            task.will().call(the.context, next, lastRet);
-            task.will = null;
-        };
+            start();
+        });
 
-        nextTick(start);
         return the;
     },
 
     /**
      * 并行执行
+     * @param [callback] {Function} 执行完回调
      * @returns {Plan}
      */
-    parallel: function () {
+    parallel: function (callback) {
         var the = this;
 
         if (the[_state] > STATE_READY) {
@@ -233,24 +244,14 @@ var Plan = Events.extend({
         // 合并的结果
         var combinedRet = [];
         var successLength = 0;
-        var waitLen = 0;
 
+        the.try(callback);
+        the.catch(callback);
         nextTick(function () {
-            each(the[_taskList], function (index, task) {
-                // if (task.wait) {
-                //     waitLen++;
-                // }
-                //
-                // var retIndex = index - waitLen;
-                // console.log(task);
-                // console.log(
-                //     'index=', index,
-                //     'waitLen=', waitLen,
-                //     'retIndex=', retIndex,
-                //     'isWait', task.wait,
-                //     'combinedRet=', combinedRet
-                // );
+            the[_planStart]();
 
+            each(the[_taskList], function (index, task) {
+                task = the[_taskStart](index);
                 task.will().call(the.context, function (err, ret) {
                     // 如果有任务已经出错
                     if (the.error) {
@@ -258,6 +259,8 @@ var Plan = Events.extend({
                     }
 
                     if (err) {
+                        the[_taskEnd](task, err);
+                        the[_taskError](task, err);
                         return the[_planEnd](err);
                     }
 
@@ -274,6 +277,8 @@ var Plan = Events.extend({
 
                     successLength++;
                     combinedRet[index] = ret;
+                    the[_taskEnd](task, ret);
+                    the[_taskSuccess](task, err, ret);
 
                     if (successLength === the.length) {
                         combinedRet = filter(combinedRet, function (ret, index) {
@@ -347,6 +352,8 @@ var _planEnd = Plan.sole();
 var _state = Plan.sole();
 var _way = Plan.sole();
 var _taskStart = Plan.sole();
+var _taskError = Plan.sole();
+var _taskSuccess = Plan.sole();
 var _taskEnd = Plan.sole();
 var _tries = Plan.sole();
 var _catches = Plan.sole();
@@ -384,12 +391,23 @@ pro[_taskStart] = function (index) {
     return task;
 };
 
-pro[_taskEnd] = function (index) {
+pro[_taskError] = function (task, err) {
     var the = this;
-    var task = the[_taskList][index];
+
+    the.emit('taskError', task, err);
+};
+
+pro[_taskSuccess] = function (task, ret) {
+    var the = this;
+
+    the.emit('taskSuccess', task, ret);
+};
+
+pro[_taskEnd] = function (task, err, ret) {
+    var the = this;
 
     task.endTime = now();
-    the.emit('taskEnd', task);
+    the.emit('taskEnd', task, err, ret);
 };
 
 pro[_planStart] = function () {
@@ -398,7 +416,7 @@ pro[_planStart] = function () {
     the.startTime = now();
     the[_state] = STATE_STARTED;
     the[_state] = STATE_PENDING;
-    the.emit('planStart', the);
+    the.emit('planStart');
 };
 
 pro[_planEnd] = function (err/*...*/) {
@@ -411,15 +429,22 @@ pro[_planEnd] = function (err/*...*/) {
     each(the[_taskList], function (index, task) {
         task.destroy();
     });
-    the.emit('planEnd', the);
+
+    var emitArgs = args.slice();
+    emitArgs.unshift('planEnd');
+    the.emit.apply(the, emitArgs);
 
     if (err) {
         the.error = err;
+        the.emit('planError', err);
         each(the[_catches], function (index, callback) {
             callback.call(the.context, err);
         });
     } else {
         args.shift();
+        emitArgs = args.slice();
+        emitArgs.unshift('planSuccess');
+        the.emit.apply(the, emitArgs);
         each(the[_tries], function (index, callback) {
             callback.apply(the.context, args);
         });

@@ -27,13 +27,14 @@ exports.asyncTaskify = function (isError, ret) {
     }
 
     return function (next, lastRet) {
-        time.nextTick(function () {
+        var timeout = random.number(1, 100);
+        setTimeout(function () {
             if (err) {
                 return next(err);
             }
 
             next(err, ret + (lastRet || 0));
-        });
+        }, timeout);
     };
 };
 
@@ -54,6 +55,13 @@ exports.syncTaskify = function (isError, ret) {
     }
 
     return function (lastRet) {
+        var timeout = random.number(1, 100);
+        var startTime = Date.now();
+
+        while (Date.now() - startTime < timeout) {
+            new Date();
+        }
+
         if (err) {
             throw err;
         }
