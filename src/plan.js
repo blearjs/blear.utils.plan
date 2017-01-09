@@ -66,9 +66,7 @@ var Plan = Events.extend({
      */
     is: function (name) {
         var the = this;
-
         the.name = name;
-
         return the;
     },
 
@@ -79,9 +77,7 @@ var Plan = Events.extend({
      */
     as: function (context) {
         var the = this;
-
         the.context = context;
-
         return the;
     },
 
@@ -170,6 +166,7 @@ var Plan = Events.extend({
             return the;
         }
 
+        the[_state] = STATE_STARTED;
         the.try(callback);
         the.catch(callback);
         nextTick(function () {
@@ -241,15 +238,15 @@ var Plan = Events.extend({
             return the;
         }
 
-        // 合并的结果
-        var combinedRet = [];
-        var successLength = 0;
-
+        the[_state] = STATE_STARTED;
         the.try(callback);
         the.catch(callback);
         nextTick(function () {
-            the[_planStart]();
+            // 合并的结果
+            var combinedRet = [];
+            var successLength = 0;
 
+            the[_planStart]();
             each(the[_taskList], function (index, task) {
                 task = the[_taskStart](index);
                 task.will().call(the.context, function (err, ret) {
@@ -414,7 +411,6 @@ pro[_planStart] = function () {
     var the = this;
 
     the.startTime = now();
-    the[_state] = STATE_STARTED;
     the[_state] = STATE_PENDING;
     the.emit('planStart');
 };

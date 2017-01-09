@@ -52,20 +52,8 @@ var Task = Class.extend({
                 var nextArgs = [];
 
                 try {
-                    // 同步任务不需要执行 next
-                    var syncRet = syncTask.call(plan.context, lastRet);
-
-                    nextArgs.push(null);
-
-                    // 如果同步任务返回值为 undefined，
-                    // 则将上一个任务的结果继续传下去
-                    if (syncRet === undefined) {
-                        nextArgs.push(lastRet);
-                    }
-                    // 否则将同步结果传给下去
-                    else {
-                        nextArgs.push(syncRet);
-                    }
+                    nextArgs.push(syncTask.call(plan.context, lastRet));
+                    nextArgs.unshift(null);
                 } catch (err) {
                     nextArgs.push(err);
                 }

@@ -20,6 +20,7 @@ function autoInstantiate(method) {
 
 exports.is = autoInstantiate('is');
 exports.as = autoInstantiate('as');
+exports.wait = autoInstantiate('wait');
 exports.task = autoInstantiate('task');
 exports.taskSync = autoInstantiate('taskSync');
 // exports.each = autoInstantiate('each');
