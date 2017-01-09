@@ -13,3 +13,47 @@
 [coveralls-img]: https://img.shields.io/coveralls/blearjs/blear.utils.plan/master.svg?style=flat-square
 [coveralls-url]: https://coveralls.io/github/blearjs/blear.utils.plan?branch=master
 
+
+# 串行
+```js
+plan
+    // 异步任务
+    .task(function (next) {
+        setTimeout(function () {
+            next(null, 1);
+        }, 10);
+    })
+    // 同步任务
+    .taskSync(function (ret) {
+        // 1 + 2
+        return ret + 2;
+    })
+    // 串行
+    .serial()
+    .try(function (ret) {
+        expect(ret).toBe(3);
+        done();
+    });
+```
+
+# 并行
+```js
+plan
+    // 异步任务
+    .task(function (next) {
+        setTimeout(function () {
+            next(null, 1);
+        }, 10);
+    })
+    // 同步任务
+    .taskSync(function () {
+        return 2;
+    })
+    // 并行
+    .parallel()
+    .try(function (ret1, ret2) {
+        expect(ret1).toBe(1);
+        expect(ret2).toBe(2);
+        done();
+    });
+```
