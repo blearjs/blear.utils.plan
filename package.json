@@ -48,6 +48,7 @@
     "blear.utils.function": "1.x",
     "blear.utils.object": "1.x",
     "blear.utils.random": "1.x",
+    "blear.utils.number": "1.x",
     "blear.utils.time": "1.x",
     "blear.utils.typeis": "1.x"
   },
