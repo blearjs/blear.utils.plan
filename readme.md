@@ -71,3 +71,13 @@ plan
 ## plan.parallel
 ## plan.try
 ## plan.catch
+
+# Events
+## planStart
+## planEnd
+## planSuccess
+## planError
+## taskStart
+## taskEnd
+## taskSuccess
+## taskError
