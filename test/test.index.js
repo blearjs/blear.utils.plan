@@ -8,12 +8,13 @@
 'use strict';
 
 describe('串行任务', function () {
-    require('./serial/sync');
     require('./serial/async');
+    require('./serial/sync');
 });
 
 describe('并行任务', function () {
     require('./parallel/async');
+    require('./parallel/sync');
 });
 
 describe('事件', function () {

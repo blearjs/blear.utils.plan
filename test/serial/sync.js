@@ -12,7 +12,7 @@ var plan = require('../../src/index');
 
 var syncTaskify = utils.syncTaskify;
 
-describe('异步', function () {
+describe('同步', function () {
 
     it('.taskSync', function (done) {
         plan
@@ -84,5 +84,16 @@ describe('异步', function () {
             });
     });
 
+    it('.eachSync', function (done) {
+        plan
+            .eachSync([1, 2, 3], function (index, item, prevRet) {
+                return item + (prevRet || 0);
+            })
+            .serial()
+            .try(function (ret) {
+                expect(ret).toBe(6);
+                done();
+            });
+    });
 });
 

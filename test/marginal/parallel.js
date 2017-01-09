@@ -191,5 +191,28 @@ describe('并行', function () {
             expect(called).toBeFalsy();
         }).serial(done);
     });
+
+    it('each 非函数', function (done) {
+        var called = false;
+        plan.each().parallel(function () {
+            called = true;
+        });
+        plan.wait(10).serial(function () {
+            expect(called).toBeFalsy();
+            done();
+        });
+    });
+
+    it('eachSync 非函数', function (done) {
+        var called = false;
+        plan.eachSync().parallel(function () {
+            called = true;
+        });
+        plan.wait(10).serial(function () {
+            expect(called).toBeFalsy();
+            done();
+        });
+    });
+
 });
 

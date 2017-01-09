@@ -120,6 +120,38 @@ var Plan = Events.extend({
         return the;
     },
 
+    each: function (list, task) {
+        var the = this;
+
+        if(!isFunction(task)) {
+            return the;
+        }
+
+        collection.each(list, function (index, item) {
+            the[_pushTask](false, function (next, prev) {
+                task(index, item, next, prev);
+            });
+        });
+
+        return the;
+    },
+
+    eachSync: function (list, task) {
+        var the = this;
+
+        if(!isFunction(task)) {
+            return the;
+        }
+
+        collection.each(list, function (index, item) {
+            the[_pushTask](true, function (prev) {
+                return task(index, item, prev);
+            });
+        });
+
+        return the;
+    },
+
     /**
      * 等待一段时间
      * @param timeout {Number} 等待时间，单位 ms
@@ -256,6 +288,11 @@ var Plan = Events.extend({
 
             the[_planStart]();
             each(the[_taskList], function (index, task) {
+                // 如果有任务已经出错
+                if (the.error) {
+                    return;
+                }
+
                 var done = false;
                 task = the[_taskStart](index);
                 task.will().call(the.context, function (err, ret) {
@@ -270,11 +307,6 @@ var Plan = Events.extend({
                     }
 
                     done = true;
-
-                    // 如果有任务已经出错
-                    if (the.error) {
-                        return;
-                    }
 
                     if (err) {
                         the[_taskEnd](task, err);

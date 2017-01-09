@@ -61,8 +61,10 @@ plan
 # API
 ## plan.task
 ## plan.taskSync
-## plan.wait
 ## plan.each
+## plan.eachSync
+## plan.repeat
+## plan.wait
 ## plan.is
 ## plan.as
 ## plan.serial

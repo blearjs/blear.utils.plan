@@ -23,4 +23,5 @@ exports.as = autoInstantiate('as');
 exports.wait = autoInstantiate('wait');
 exports.task = autoInstantiate('task');
 exports.taskSync = autoInstantiate('taskSync');
-// exports.each = autoInstantiate('each');
+exports.each = autoInstantiate('each');
+exports.eachSync = autoInstantiate('eachSync');
