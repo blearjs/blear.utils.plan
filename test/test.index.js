@@ -10,11 +10,13 @@
 describe('串行任务', function () {
     require('./serial/async');
     require('./serial/sync');
+    require('./serial/all');
 });
 
 describe('并行任务', function () {
     require('./parallel/async');
     require('./parallel/sync');
+    require('./parallel/all');
 });
 
 describe('事件', function () {
