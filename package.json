@@ -1,7 +1,7 @@
 {
   "name": "blear.utils.plan",
-  "version": "2.1.0",
-  "description": "（同步、异步）任务计划（流程控制）",
+  "version": "2.1.1",
+  "description": "（同步、异步、promise）任务计划（流程控制）",
   "scripts": {
     "live": "browser-sync start --config bs-config.js",
     "test": "node ./node_modules/.bin/karma start karma.conf.js --single-run",
