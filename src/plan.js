@@ -212,12 +212,6 @@ var Plan = Events.extend({
         });
     },
 
-    // each: function () {
-    //     var the = this;
-    //
-    //     return the;
-    // },
-
     /**
      * 串行执行
      * @param [callback] {Function} 执行完回调
