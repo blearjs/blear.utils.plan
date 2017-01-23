@@ -122,6 +122,7 @@ var Task = Class.extend({
             // 确保每一个任务只执行一次
             return fun.once(task);
         };
+        the.task = task;
         the.plan = plan;
         the.name = name + '';
         the.copied = null;
@@ -145,7 +146,7 @@ var Task = Class.extend({
     copy: function () {
         var the = this;
         // 复制的时候，自我任务已经被转换成异步的了
-        var task = new Task(the.plan, false, the.name, the.fn);
+        var task = new Task(the.plan, TASK_ASYNC, the.name, the.task);
         task.copied = the;
         return task;
     },
