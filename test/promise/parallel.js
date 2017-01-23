@@ -188,70 +188,83 @@ describe('parallel', function () {
                     resolve(1);
                 });
             })
-            .task(function (next, prev) {
-                // 2 + 1
-                next(null, 2 + prev);
+            .task(function (next) {
+                // 2
+                next(null, 2);
             })
-            .taskSync(function (prev) {
-                // 3 + 3
-                return 3 + prev;
+            .taskSync(function () {
+                // 3
+                return 3;
             })
-            .each([4, 5], function (index, val, next, prev) {
-                // 第 1 次：4 + 6
-                // 第 2 次：5 + 10
-                next(null, val + prev);
+            .each([4, 5], function (index, val, next) {
+                // 第 1 次：4
+                // 第 2 次：5
+                next(null, val);
             })
-            .eachSync([6, 7], function (index, val, prev) {
-                // 第 1 次：6 + 15
-                // 第 2 次：7 + 21
-                return val + prev;
+            .eachSync([6, 7], function (index, val) {
+                // 第 1 次：6
+                // 第 2 次：7
+                return val;
             })
-            .serial()
-            .try(function (result) {
-                expect(result).toBe(28);
+            .parallel()
+            .try(function (ret1, ret2, ret3, ret4, ret5, ret6, ret7) {
+                expect(ret1).toBe(1);
+                expect(ret2).toBe(2);
+                expect(ret3).toBe(3);
+                expect(ret4).toBe(4);
+                expect(ret5).toBe(5);
+                expect(ret6).toBe(6);
+                expect(ret7).toBe(7);
                 done();
             });
     });
 
-// it('.taskPromise + .task + .taskSync + .each + .eachSync + .eachPromise', function (done) {
-//     plan
-//         .taskPromise(function () {
-//             return new Promise(function (resolve) {
-//                 // 1
-//                 resolve(1);
-//             });
-//         })
-//         .task(function (next, prev) {
-//             // 2 + 1
-//             next(null, 2 + prev);
-//         })
-//         .taskSync(function (prev) {
-//             // 3 + 3
-//             return 3 + prev;
-//         })
-//         .each([4, 5], function (index, val, next, prev) {
-//             // 第 1 次：4 + 6
-//             // 第 2 次：5 + 10
-//             next(null, val + prev);
-//         })
-//         .eachSync([6, 7], function (index, val, prev) {
-//             // 第 1 次：6 + 15
-//             // 第 2 次：7 + 21
-//             return val + prev;
-//         })
-//         .eachPromise([8, 9], function (index, val, prev) {
-//             return new Promise(function (resolve) {
-//                 // 第 1 次：8 + 28
-//                 // 第 2 次：9 + 36
-//                 resolve(val + prev);
-//             });
-//         })
-//         .serial()
-//         .try(function (result) {
-//             expect(result).toBe(45);
-//             done();
-//         });
-// });
-
+    it('.taskPromise + .task + .taskSync + .each + .eachSync + .eachPromise', function (done) {
+        plan
+            .taskPromise(function () {
+                return new Promise(function (resolve) {
+                    // 1
+                    resolve(1);
+                });
+            })
+            .task(function (next) {
+                // 2
+                next(null, 2);
+            })
+            .taskSync(function () {
+                // 3
+                return 3;
+            })
+            .each([4, 5], function (index, val, next) {
+                // 第 1 次：4
+                // 第 2 次：5
+                next(null, val);
+            })
+            .eachSync([6, 7], function (index, val) {
+                // 第 1 次：6
+                // 第 2 次：7
+                return val;
+            })
+            .eachPromise([8, 9], function (index, val) {
+                return new Promise(function (resolve) {
+                    // 第 1 次：8
+                    // 第 2 次：9
+                    resolve(val);
+                });
+            })
+            .parallel()
+            .try(function (ret1, ret2, ret3, ret4, ret5, ret6, ret7, ret8, ret9) {
+                expect(ret1).toBe(1);
+                expect(ret2).toBe(2);
+                expect(ret3).toBe(3);
+                expect(ret4).toBe(4);
+                expect(ret5).toBe(5);
+                expect(ret6).toBe(6);
+                expect(ret7).toBe(7);
+                expect(ret8).toBe(8);
+                expect(ret9).toBe(9);
+                done();
+            });
+    });
 
 });
