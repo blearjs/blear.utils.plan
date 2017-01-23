@@ -146,10 +146,6 @@ var Plan = Events.extend({
     each: function (list, fn) {
         var the = this;
 
-        if (!isFunction(fn)) {
-            return the;
-        }
-
         collection.each(list, function (index, item) {
             the[_pushTask](TASK_ASYNC, function (next, prev) {
                 fn(index, item, next, prev);
@@ -168,10 +164,6 @@ var Plan = Events.extend({
     eachSync: function (list, fn) {
         var the = this;
 
-        if (!isFunction(fn)) {
-            return the;
-        }
-
         collection.each(list, function (index, item) {
             the[_pushTask](TASK_SYNC, function (prev) {
                 return fn(index, item, prev);
@@ -181,10 +173,22 @@ var Plan = Events.extend({
         return the;
     },
 
-
-
+    /**
+     * 循环许诺任务
+     * @param list
+     * @param fn
+     * @returns {Plan}
+     */
     eachPromise: function (list, fn) {
+        var the = this;
 
+        collection.each(list, function (index, item) {
+            the[_pushTask](TASK_PROMISE, function (prev) {
+                return fn(index, item, prev);
+            });
+        });
+
+        return the;
     },
 
     /**

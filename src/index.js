@@ -69,3 +69,10 @@ exports.each = autoInstantiate('each');
  * @param fn
  */
 exports.eachSync = autoInstantiate('eachSync');
+
+/**
+ * @type Function
+ * @param list
+ * @param fn
+ */
+exports.eachPromise = autoInstantiate('eachPromise');

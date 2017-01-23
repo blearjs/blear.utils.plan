@@ -38,5 +38,6 @@
 
 describe('promise', function () {
     require('./promise/serial');
+    require('./promise/parallel');
 });
 
