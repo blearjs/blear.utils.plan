@@ -17,10 +17,16 @@ var typeis = require('blear.utils.typeis');
 var accessArgs = access.args;
 var guid = random.guid;
 var isFunction = typeis.Function;
+// 异步任务
+var TASK_ASYNC = 1;
+// 同步任务
+var TASK_SYNC = 2;
+// promise 任务
+var TASK_PROMISE = 3;
 
 var Task = Class.extend({
     className: 'Task',
-    constructor: function (plan, sync, name, fn) {
+    constructor: function (plan, type, name, fn) {
         var the = this;
         var args = accessArgs(arguments);
 
@@ -33,23 +39,34 @@ var Task = Class.extend({
         if (!isFunction(fn)) {
 
             if (typeof DEBUG !== 'undefined' && DEBUG) {
-                var errMsg = '`#task([name], fn)`：`fn` 必须为同、异步函数，例如：\n';
+                var errMsg = '';
 
-                if (sync) {
-                    errMsg += '// 同步\n' +
-                        '`#taskSync([name], fn)`：`fn` 必须为同、异步函数，例如：\n' +
-                        '#taskSync("my task", function () {\n' +
-                        '   ... balabala ...\n' +
-                        '   return bala;\n' +
-                        '})\n';
-                } else {
-                    errMsg += '// 异步\n' +
-                        '#task("my task", function (next) {\n' +
-                        '   ... balabala ...\n' +
-                        '   setTimeout(function () {\n' +
-                        '       next(new Error(bala), bala);\n' +
-                        '    });\n' +
-                        '})\n\n';
+                switch (type) {
+                    case TASK_ASYNC:
+                        errMsg += '// 异步任务\n' +
+                            '#task("my task", function (next) {\n' +
+                            '   ... balabala ...\n' +
+                            '   setTimeout(function () {\n' +
+                            '       next(new Error(bala), bala);\n' +
+                            '    });\n' +
+                            '})\n\n';
+                        break;
+
+                    case TASK_SYNC:
+                        errMsg += '// 同步任务\n' +
+                            '#taskSync("my task", function () {\n' +
+                            '   ... balabala ...\n' +
+                            '   return bala;\n' +
+                            '})\n';
+                        break;
+
+                    case TASK_PROMISE:
+                        errMsg += '// promise 任务\n' +
+                            '#taskPromise("my task", function () {\n' +
+                            '   ... balabala ...\n' +
+                            '   return new Promise(... balabala ...);\n' +
+                            '})\n';
+                        break;
                 }
 
                 throw new SyntaxError(errMsg);
@@ -58,44 +75,55 @@ var Task = Class.extend({
             return the;
         }
 
-        if (sync) {
-            var syncTask = fn;
-            fn = function (next, lastRet) {
-                var nextArgs = [];
+        var task = fn;
 
-                try {
-                    nextArgs.push(syncTask.call(plan.context, lastRet));
-                    nextArgs.unshift(null);
-                } catch (err) {
-                    nextArgs.push(err);
+        switch (type) {
+            case TASK_ASYNC:
+                // .task(function () {
+                //                ^^^^
+                //                此处没有显示 next
+                // })
+                if (fn.length === 0) {
+                    throw new SyntaxError(
+                        '异步任务必须显式调用 `next`：\n' +
+                        'plan.task(function (next, prevRet) {\n' +
+                        '    next(err, ret);\n' +
+                        '})\n'
+                    );
                 }
+                break;
 
-                next.apply(plan.context, nextArgs);
-            };
-        } else {
-            // .task(function () {
-            //                ^^^^
-            //                此处没有显示 next
-            // })
-            if (fn.length === 0) {
-                throw new SyntaxError(
-                    '异步任务必须显式调用 `next`：\n' +
-                    'plan.task(function (next, prevRet) {\n' +
-                    '    next(err, ret);\n' +
-                    '})\n'
-                );
-            }
+            case TASK_SYNC:
+                task = function (next, prev) {
+                    var nextArgs = [];
+
+                    try {
+                        nextArgs.push(fn.call(plan.context, prev));
+                        nextArgs.unshift(null);
+                    } catch (err) {
+                        nextArgs.push(err);
+                    }
+
+                    next.apply(plan.context, nextArgs);
+                };
+                break;
+
+            case TASK_PROMISE:
+                task = function (next, prev) {
+                    fn.call(plan.context, prev).then(/*resolved*/function (result) {
+                        next(null, result);
+                    }, /*rejected*/next);
+                };
+                break;
         }
 
         // 因为任务可以重复执行，所以这里以函数返回
         the.will = function () {
             // 确保每一个任务只执行一次
-            return fun.once(fn);
+            return fun.once(task);
         };
         the.plan = plan;
-        the.sync = sync;
         the.name = name + '';
-        the.fn = fn;
         the.copied = null;
         the.index = plan.length;
         the.startTime = the.endTime = 0;
@@ -127,7 +155,7 @@ var Task = Class.extend({
      */
     destroy: function () {
         var the = this;
-        the.plan = the.fn = the.will = the.copied = the.context = null;
+        the.plan = the.will = the.copied = the.context = null;
     }
 });
 

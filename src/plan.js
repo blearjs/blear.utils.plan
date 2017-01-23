@@ -40,6 +40,12 @@ var WAY_UNDETERMINED = 0;
 var WAY_SERIAL = 1;
 // 执行方式：并行
 var WAY_PARALLEL = 2;
+// 异步任务
+var TASK_ASYNC = 1;
+// 同步任务
+var TASK_SYNC = 2;
+// promise 任务
+var TASK_PROMISE = 3;
 
 var Plan = Events.extend({
     className: 'Plan',
@@ -88,7 +94,7 @@ var Plan = Events.extend({
      * @returns {Plan}
      */
     task: function (name, fn) {
-        return this[_pushTask](false, name, fn);
+        return this[_pushTask](TASK_ASYNC, name, fn);
     },
 
     /**
@@ -98,7 +104,18 @@ var Plan = Events.extend({
      * @returns {Plan}
      */
     taskSync: function (name, fn) {
-        return this[_pushTask](true, name, fn);
+        return this[_pushTask](TASK_SYNC, name, fn);
+    },
+
+    /**
+     * 计划一个许诺任务
+     * @param [name]
+     * @param fn
+     * @returns {Plan}
+     */
+    taskPromise: function (name, fn) {
+        var the = this;
+        return the[_pushTask](TASK_PROMISE, name, fn);
     },
 
     /**
@@ -120,36 +137,54 @@ var Plan = Events.extend({
         return the;
     },
 
-    each: function (list, task) {
+    /**
+     * 循环异步任务
+     * @param list
+     * @param fn
+     * @returns {Plan}
+     */
+    each: function (list, fn) {
         var the = this;
 
-        if(!isFunction(task)) {
+        if (!isFunction(fn)) {
             return the;
         }
 
         collection.each(list, function (index, item) {
-            the[_pushTask](false, function (next, prev) {
-                task(index, item, next, prev);
+            the[_pushTask](TASK_ASYNC, function (next, prev) {
+                fn(index, item, next, prev);
             });
         });
 
         return the;
     },
 
-    eachSync: function (list, task) {
+    /**
+     * 循环异步任务
+     * @param list
+     * @param fn
+     * @returns {Plan}
+     */
+    eachSync: function (list, fn) {
         var the = this;
 
-        if(!isFunction(task)) {
+        if (!isFunction(fn)) {
             return the;
         }
 
         collection.each(list, function (index, item) {
-            the[_pushTask](true, function (prev) {
-                return task(index, item, prev);
+            the[_pushTask](TASK_SYNC, function (prev) {
+                return fn(index, item, prev);
             });
         });
 
         return the;
+    },
+
+
+
+    eachPromise: function (list, fn) {
+
     },
 
     /**
@@ -163,7 +198,7 @@ var Plan = Events.extend({
         timeout = timeout || 1;
         the[_excludeMap][the[_taskList].length] = 1;
 
-        return the[_pushTask](false, 'wait ' + timeout + 'ms', function (next/*...*/) {
+        return the[_pushTask](TASK_ASYNC, 'wait ' + timeout + 'ms', function (next/*...*/) {
             var args = accessArgs(arguments).slice(1);
 
             setTimeout(function () {
@@ -395,7 +430,7 @@ var _catches = Plan.sole();
 var _excludeMap = Plan.sole();
 var pro = Plan.prototype;
 
-pro[_pushTask] = function (sync, name, fn) {
+pro[_pushTask] = function (type, name, fn) {
     var the = this;
 
     if (the[_state] > STATE_READY) {
@@ -409,7 +444,7 @@ pro[_pushTask] = function (sync, name, fn) {
         return the;
     }
 
-    var task = new Task(the, sync, name, fn);
+    var task = new Task(the, type, name, fn);
 
     if (!task.will) {
         return the;
