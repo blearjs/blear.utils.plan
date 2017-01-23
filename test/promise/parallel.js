@@ -22,6 +22,7 @@ Promise.prototype.then = function (resolved, rejected) {
 };
 
 describe('parallel', function () {
+
     it('.taskPromise x 1 resolve', function (done) {
         plan
             .taskPromise(function () {
