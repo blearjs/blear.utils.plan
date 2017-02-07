@@ -67,10 +67,10 @@ describe('并行', function () {
             .taskSync(function () {
                 return 1;
             })
-            .parallel(function (_ret) {
+            .parallel(function (err, _ret) {
                 ret1 = _ret
             })
-            .parallel(function (_ret) {
+            .parallel(function (err, _ret) {
                 ret2 = _ret
             });
 
@@ -78,7 +78,7 @@ describe('并行', function () {
             .wait(10)
             .taskSync(function () {
                 expect(ret1).toBe(1);
-                expect(ret2).toBe(undefined);
+                expect(ret2).toBe(1);
                 window.DEBUG = true;
             })
             .serial(done);
@@ -117,7 +117,7 @@ describe('并行', function () {
                     next(null, 2);
                 }, 2);
             })
-            .parallel(function (_ret) {
+            .parallel(function (err, _ret) {
                 ret1 = _ret;
             });
 
@@ -134,7 +134,7 @@ describe('并行', function () {
         window.DEBUG = false;
         plan.taskSync(function () {
             return 1;
-        }).parallel(function (ret) {
+        }).parallel(function (err, ret) {
             expect(ret).toBe(1);
             window.DEBUG = true;
             done();

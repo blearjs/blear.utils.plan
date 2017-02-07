@@ -65,10 +65,10 @@ describe('串行', function () {
             .taskSync(function () {
                 return 1;
             })
-            .serial(function (_ret) {
+            .serial(function (err, _ret) {
                 ret1 = _ret
             })
-            .serial(function (_ret) {
+            .serial(function (err, _ret) {
                 ret2 = _ret
             });
 
@@ -76,7 +76,7 @@ describe('串行', function () {
             .wait(10)
             .taskSync(function () {
                 expect(ret1).toBe(1);
-                expect(ret2).toBe(undefined);
+                expect(ret2).toBe(1);
                 window.DEBUG = true;
             })
             .serial(done);
@@ -115,7 +115,7 @@ describe('串行', function () {
                     next(null, 2);
                 }, 2);
             })
-            .serial(function (_ret) {
+            .serial(function (err, _ret) {
                 ret1 = _ret;
             });
 

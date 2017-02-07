@@ -57,8 +57,9 @@ var Plan = Events.extend({
         the[_current] = the.length = the.startTime = the.endTime = 0;
         the[_state] = STATE_READY;
         the[_way] = WAY_UNDETERMINED;
-        the[_tries] = [];
-        the[_catches] = [];
+        the[_allCallbackList] = [];
+        the[_tryCallbackList] = [];
+        the[_catchCallbackList] = [];
         the[_excludeMap] = {};
         the.name = new Date() + ' plan';
         the.context = context;
@@ -224,6 +225,10 @@ var Plan = Events.extend({
             return the;
         }
 
+        if(isFunction(callback)) {
+            the[_allCallbackList].push(callback);
+        }
+
         if (the[_state] > STATE_READY) {
 
             if (typeof DEBUG !== 'undefined' && DEBUG) {
@@ -236,8 +241,6 @@ var Plan = Events.extend({
         }
 
         the[_state] = STATE_STARTED;
-        the.try(callback);
-        the.catch(callback);
         nextTick(function () {
             the[_planStart]();
 
@@ -300,6 +303,10 @@ var Plan = Events.extend({
             return the;
         }
 
+        if(isFunction(callback)) {
+            the[_allCallbackList].push(callback);
+        }
+
         if (the[_state] > STATE_READY) {
 
             if (typeof DEBUG !== 'undefined' && DEBUG) {
@@ -312,8 +319,6 @@ var Plan = Events.extend({
         }
 
         the[_state] = STATE_STARTED;
-        the.try(callback);
-        the.catch(callback);
         nextTick(function () {
             // 合并的结果
             var combinedRet = [];
@@ -379,7 +384,7 @@ var Plan = Events.extend({
             return the;
         }
 
-        the[_tries].push(callback);
+        the[_tryCallbackList].push(callback);
 
         return the;
     },
@@ -396,7 +401,7 @@ var Plan = Events.extend({
             return the;
         }
 
-        the[_catches].push(callback);
+        the[_catchCallbackList].push(callback);
 
         return the;
     },
@@ -408,7 +413,7 @@ var Plan = Events.extend({
         var the = this;
 
         the[_state] = STATE_DESTROYED;
-        the[_taskList] = the[_tries] = the[_catches] = the.context = the[_excludeMap] = null;
+        the[_taskList] = the[_allCallbackList] = the[_tryCallbackList] = the[_catchCallbackList] = the.context = the[_excludeMap] = null;
         Plan.invoke('destroy', the);
     }
 });
@@ -423,8 +428,9 @@ var _taskStart = Plan.sole();
 var _taskError = Plan.sole();
 var _taskSuccess = Plan.sole();
 var _taskEnd = Plan.sole();
-var _tries = Plan.sole();
-var _catches = Plan.sole();
+var _tryCallbackList = Plan.sole();
+var _catchCallbackList = Plan.sole();
+var _allCallbackList = Plan.sole();
 var _excludeMap = Plan.sole();
 var pro = Plan.prototype;
 
@@ -508,7 +514,10 @@ pro[_planEnd] = function (err/*...*/) {
     if (err) {
         the.error = err;
         the.emit('planError', err);
-        each(the[_catches], function (index, callback) {
+        each(the[_allCallbackList], function (index, callback) {
+            callback.call(the.context, err);
+        });
+        each(the[_catchCallbackList], function (index, callback) {
             callback.call(the.context, err);
         });
     } else {
@@ -516,7 +525,12 @@ pro[_planEnd] = function (err/*...*/) {
         emitArgs = args.slice();
         emitArgs.unshift('planSuccess');
         the.emit.apply(the, emitArgs);
-        each(the[_tries], function (index, callback) {
+        var allArgs = args.slice();
+        allArgs.unshift(null);
+        each(the[_allCallbackList], function (index, callback) {
+            callback.apply(the.context, allArgs);
+        });
+        each(the[_tryCallbackList], function (index, callback) {
             callback.apply(the.context, args);
         });
     }
@@ -525,4 +539,6 @@ pro[_planEnd] = function (err/*...*/) {
 };
 
 module.exports = Plan;
+
+
 
