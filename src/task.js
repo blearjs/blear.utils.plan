@@ -37,41 +37,6 @@ var Task = Class.extend({
         }
 
         if (!isFunction(fn)) {
-
-            if (typeof DEBUG !== 'undefined' && DEBUG) {
-                var errMsg = '';
-
-                switch (type) {
-                    case TASK_ASYNC:
-                        errMsg += '// 异步任务\n' +
-                            '#task("my task", function (next) {\n' +
-                            '   ... balabala ...\n' +
-                            '   setTimeout(function () {\n' +
-                            '       next(new Error(bala), bala);\n' +
-                            '    });\n' +
-                            '})\n\n';
-                        break;
-
-                    case TASK_SYNC:
-                        errMsg += '// 同步任务\n' +
-                            '#taskSync("my task", function () {\n' +
-                            '   ... balabala ...\n' +
-                            '   return bala;\n' +
-                            '})\n';
-                        break;
-
-                    case TASK_PROMISE:
-                        errMsg += '// promise 任务\n' +
-                            '#taskPromise("my task", function () {\n' +
-                            '   ... balabala ...\n' +
-                            '   return new Promise(... balabala ...);\n' +
-                            '})\n';
-                        break;
-                }
-
-                throw new SyntaxError(errMsg);
-            }
-
             return the;
         }
 

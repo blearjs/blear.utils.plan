@@ -46,24 +46,10 @@ describe('并行', function () {
             });
     });
 
-    it('重复计划 DEBUG=true', function (done) {
-        expect(
-            function () {
-                plan
-                    .taskSync('a', function () {
-                        return 1;
-                    })
-                    .parallel()
-                    .parallel();
-            }
-        ).toThrowError();
-        plan.wait(10).serial(done);
-    });
-
-    it('重复计划 DEBUG=false', function (done) {
+    it('重复计划', function (done) {
         var ret1;
         var ret2;
-        window.DEBUG = false;
+
         plan
             .taskSync(function () {
                 return 1;
@@ -80,32 +66,12 @@ describe('并行', function () {
             .taskSync(function () {
                 expect(ret1).toBe(1);
                 expect(ret2).toBe(1);
-                window.DEBUG = true;
             })
             .serial(done);
     });
 
-    it('任务重复完成 DEBUG=true', function (done) {
-        plan
-            .task('a', function (next) {
-                setTimeout(function () {
-                    next(null, 1);
-                }, 1);
-                setTimeout(function () {
-                    next(null, 2);
-                }, 2);
-            })
-            .parallel();
-
-        window.onerror = function (msg) {
-            expect(msg).toMatch(/a/);
-            window.onerror = null;
-            done();
-        };
-    });
-
-    it('任务重复完成 DEBUG=false', function (done) {
-        window.DEBUG = false;
+    it('任务重复完成', function (done) {
+        global.DEBUG = false;
 
         var ret1;
 
@@ -126,18 +92,16 @@ describe('并行', function () {
             .wait(100)
             .taskSync(function () {
                 expect(ret1).toBe(1);
-                window.DEBUG = true;
+                global.DEBUG = true;
             })
             .serial(done);
     });
 
-    it('任务开始之后插任务 DEBUG=false', function (done) {
-        window.DEBUG = false;
+    it('任务开始之后插任务', function (done) {
         plan.taskSync(function () {
             return 1;
         }).parallel(function (err, ret) {
             expect(ret).toBe(1);
-            window.DEBUG = true;
             done();
         }).wait(10);
     });
@@ -172,23 +136,12 @@ describe('并行', function () {
         });
     });
 
-    it('非函数任务 DEBUG=true', function () {
-        expect(function () {
-            plan.task().parallel();
-        }).toThrowError();
-        expect(function () {
-            plan.taskSync().parallel();
-        }).toThrowError();
-    });
-
-    it('非函数任务 DEBUG=false', function (done) {
-        window.DEBUG = false;
+    it('非函数任务', function (done) {
         var called = false;
         plan.task().parallel(function () {
             called = true;
         });
         plan.wait(10).taskSync(function () {
-            window.DEBUG = true;
             expect(called).toBeFalsy();
         }).serial(done);
     });

@@ -228,13 +228,6 @@ var Plan = Events.extend({
         }
 
         if (the[_state] > STATE_READY) {
-
-            if (typeof DEBUG !== 'undefined' && DEBUG) {
-                throw new SyntaxError(
-                    '计划已开始执行，无法重新开始'
-                );
-            }
-
             return the;
         }
 
@@ -248,13 +241,6 @@ var Plan = Events.extend({
                 var done = false;
                 var next = function (err, lastRet) {
                     if (done) {
-
-                        if (typeof DEBUG !== 'undefined' && DEBUG) {
-                            throw new SyntaxError(
-                                '`' + task.name + '` 任务被重复完成，请检查。'
-                            );
-                        }
-
                         return;
                     }
 
@@ -306,13 +292,6 @@ var Plan = Events.extend({
         }
 
         if (the[_state] > STATE_READY) {
-
-            if (typeof DEBUG !== 'undefined' && DEBUG) {
-                throw new SyntaxError(
-                    '计划已开始执行，无法重新开始'
-                );
-            }
-
             return the;
         }
 
@@ -333,12 +312,6 @@ var Plan = Events.extend({
                 task = the[_taskStart](index);
                 task.will().call(the.context, function (err, ret) {
                     if (done) {
-                        if (typeof DEBUG !== 'undefined' && DEBUG) {
-                            throw new SyntaxError(
-                                '`' + task.name + '` 任务被重复完成，请检查。'
-                            );
-                        }
-
                         return;
                     }
 
@@ -387,13 +360,6 @@ var Plan = Events.extend({
         }
 
         if (the[_state] > STATE_READY) {
-
-            if (typeof DEBUG !== 'undefined' && DEBUG) {
-                throw new SyntaxError(
-                    '计划已开始执行，无法重新开始'
-                );
-            }
-
             return the;
         }
 
@@ -495,13 +461,6 @@ pro[_pushTask] = function (type, name, fn) {
     var the = this;
 
     if (the[_state] > STATE_READY) {
-
-        if (typeof DEBUG !== 'undefined' && DEBUG) {
-            throw new SyntaxError(
-                '任务已开始，无法分配新任务'
-            );
-        }
-
         return the;
     }
 

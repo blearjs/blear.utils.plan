@@ -12,11 +12,15 @@ var expect = require('chai-jasmine').expect;
 var plan = require('../../src/index');
 
 describe('promise 边界', function () {
-    it('fn 不是函数', function () {
-        window.DEBUG = true;
-        expect(function () {
-            plan.taskPromise();
-        }).toThrowError();
+    it('fn 不是函数', function (done) {
+        var called = false;
+        plan.taskPromise().try(function () {
+            called = true;
+        });
+        setTimeout(function () {
+            expect(called).toBeFalsy();
+            done();
+        }, 100);
     });
 });
 

@@ -44,24 +44,10 @@ describe('串行', function () {
             });
     });
 
-    it('重复计划 DEBUG=true', function (done) {
-        expect(
-            function () {
-                plan
-                    .taskSync('a', function () {
-                        return 1;
-                    })
-                    .serial()
-                    .serial();
-            }
-        ).toThrowError();
-        plan.wait(10).serial(done);
-    });
-
-    it('重复计划 DEBUG=false', function (done) {
+    it('重复计划', function (done) {
         var ret1;
         var ret2;
-        window.DEBUG = false;
+        global.DEBUG = false;
         plan
             .taskSync(function () {
                 return 1;
@@ -78,33 +64,12 @@ describe('串行', function () {
             .taskSync(function () {
                 expect(ret1).toBe(1);
                 expect(ret2).toBe(1);
-                window.DEBUG = true;
+                global.DEBUG = true;
             })
             .serial(done);
     });
 
-    it('任务重复完成 DEBUG=true', function (done) {
-        plan
-            .task('a', function (next) {
-                setTimeout(function () {
-                    next(null, 1);
-                }, 1);
-                setTimeout(function () {
-                    next(null, 2);
-                }, 2);
-            })
-            .serial();
-
-        window.onerror = function (msg) {
-            expect(msg).toMatch(/a/);
-            window.onerror = null;
-            done();
-        };
-    });
-
-    it('任务重复完成 DEBUG=false', function (done) {
-        window.DEBUG = false;
-
+    it('任务重复完成', function (done) {
         var ret1;
 
         plan
@@ -124,16 +89,18 @@ describe('串行', function () {
             .wait(100)
             .taskSync(function () {
                 expect(ret1).toBe(1);
-                window.DEBUG = true;
             })
             .serial(done);
     });
 
     it('任务开始之后插任务', function (done) {
-        expect(function () {
-            plan.wait(10).serial().wait(10);
-        }).toThrowError();
-        plan.wait(10).serial(done);
+        plan.wait(10).serial().wait(10);
+        plan.wait(10).serial(function (err) {
+            expect(err).toBeNull();
+        }).on('planEnd', function (err, ret) {
+            expect(this.length).toBe(1);
+            done();
+        });
     });
 
     it('有异步任务没有调 next', function () {
@@ -144,23 +111,12 @@ describe('串行', function () {
         }).toThrowError();
     });
 
-    it('非函数任务 DEBUG=true', function () {
-        expect(function () {
-            plan.task().serial();
-        }).toThrowError();
-        expect(function () {
-            plan.taskSync().serial();
-        }).toThrowError();
-    });
-
-    it('非函数任务 DEBUG=false', function (done) {
-        window.DEBUG = false;
+    it('非函数任务', function (done) {
         var called = false;
         plan.task().serial(function () {
             called = true;
         });
         plan.wait(10).taskSync(function () {
-            window.DEBUG = true;
             expect(called).toBeFalsy();
         }).serial(done);
     });
