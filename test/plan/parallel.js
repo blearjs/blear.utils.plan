@@ -7,6 +7,7 @@
 
 'use strict';
 
+var expect = require('chai-jasmine').expect;
 var plan = require('../../src/index');
 
 it('并行基本', function (done) {

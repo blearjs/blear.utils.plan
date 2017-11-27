@@ -12,8 +12,6 @@ var typeis = require('blear.utils.typeis');
 var access = require('blear.utils.access');
 var time = require('blear.utils.time');
 var collection = require('blear.utils.collection');
-var random = require('blear.utils.random');
-var object = require('blear.utils.object');
 
 var Task = require('./task');
 
@@ -225,7 +223,7 @@ var Plan = Events.extend({
             return the;
         }
 
-        if(isFunction(callback)) {
+        if (isFunction(callback)) {
             the[_allCallbackList].push(callback);
         }
 
@@ -303,7 +301,7 @@ var Plan = Events.extend({
             return the;
         }
 
-        if(isFunction(callback)) {
+        if (isFunction(callback)) {
             the[_allCallbackList].push(callback);
         }
 
@@ -364,6 +362,68 @@ var Plan = Events.extend({
                         combinedRet.unshift(null);
                         the[_planEnd].apply(the, combinedRet);
                     }
+                });
+                task.will = null;
+            });
+        });
+
+        return the;
+    },
+
+    /**
+     * 竞速执行
+     * @param [callback] {Function} 执行完回调
+     * @returns {Plan}
+     */
+    race: function (callback) {
+        var the = this;
+
+        if (!the.length) {
+            return the;
+        }
+
+        if (isFunction(callback)) {
+            the[_allCallbackList].push(callback);
+        }
+
+        if (the[_state] > STATE_READY) {
+
+            if (typeof DEBUG !== 'undefined' && DEBUG) {
+                throw new SyntaxError(
+                    '计划已开始执行，无法重新开始'
+                );
+            }
+
+            return the;
+        }
+
+        the[_state] = STATE_STARTED;
+        nextTick(function () {
+            var done = false;
+            the[_planStart]();
+            each(the[_taskList], function (index, task) {
+                task = the[_taskStart](index);
+                task.will().call(the.context, function (err, ret) {
+                    if (err) {
+                        the[_taskEnd](task, err);
+                        the[_taskError](task, err);
+
+                        if (!done) {
+                            the[_planEnd].call(the, err);
+                        }
+
+                        return;
+                    }
+
+                    // 如果已有任务完成，则退出后续操作
+                    if (done) {
+                        return;
+                    }
+
+                    done = true;
+                    the[_taskEnd](task, ret);
+                    the[_taskSuccess](task, err, ret);
+                    the[_planEnd].call(the, err, ret);
                 });
                 task.will = null;
             });

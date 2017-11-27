@@ -8,6 +8,7 @@
 
 'use strict';
 
+var expect = require('chai-jasmine').expect;
 var plan = require('../../src/index');
 
 var Promise = function (fn) {

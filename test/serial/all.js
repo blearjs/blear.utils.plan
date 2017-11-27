@@ -8,6 +8,7 @@
 
 'use strict';
 
+var expect = require('chai-jasmine').expect;
 var plan = require('../../src/index');
 
 it('所有', function (done) {

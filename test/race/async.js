@@ -21,12 +21,9 @@ describe('异步', function () {
             .task(asyncTaskify(false, 2))
             .task(asyncTaskify(false, 3))
             .task(asyncTaskify(false, 4))
-            .parallel()
-            .try(function (ret1, ret2, ret3, ret4) {
-                expect(ret1).toBe(1);
-                expect(ret2).toBe(2);
-                expect(ret3).toBe(3);
-                expect(ret4).toBe(4);
+            .race()
+            .try(function (ret) {
+                expect(arguments.length).toBe(1);
                 done();
             });
     });

@@ -7,6 +7,7 @@
 
 'use strict';
 
+var expect = require('chai-jasmine').expect;
 var utils = require('../utils');
 var plan = require('../../src/index');
 

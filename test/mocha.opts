@@ -1,0 +1,3 @@
+--reporter progress
+--ui bdd
+--timeout 0
