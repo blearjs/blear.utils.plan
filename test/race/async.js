@@ -10,6 +10,7 @@
 var expect = require('chai-jasmine').expect;
 var utils = require('../utils');
 var plan = require('../../src/index');
+var Promise = require('../utils').Promise;
 
 var asyncTaskify = utils.asyncTaskify;
 

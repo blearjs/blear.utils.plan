@@ -69,3 +69,16 @@ exports.syncTaskify = function (isError, ret) {
         return ret + (lastRet || 0);
     };
 };
+
+var Promise = function (fn) {
+    this.fn = fn;
+};
+Promise.prototype.then = function (resolved, rejected) {
+    this.fn(function (result) {
+        resolved(result);
+    }, function (err) {
+        rejected(err);
+    });
+};
+
+exports.Promise = Promise;

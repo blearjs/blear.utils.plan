@@ -10,17 +10,7 @@
 
 var expect = require('chai-jasmine').expect;
 var plan = require('../../src/index');
-
-var Promise = function (fn) {
-    this.fn = fn;
-};
-Promise.prototype.then = function (resolved, rejected) {
-    this.fn(function (result) {
-        resolved(result);
-    }, function (err) {
-        rejected(err);
-    });
-};
+var Promise = require('../utils').Promise;
 
 describe('parallel', function () {
 
