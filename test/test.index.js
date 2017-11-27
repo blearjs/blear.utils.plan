@@ -25,6 +25,12 @@ describe('竞速任务', function () {
     require('./race/all');
 });
 
+describe('任意任务', function () {
+    require('./any/async');
+    require('./any/sync');
+    require('./any/all');
+});
+
 describe('事件', function () {
     require('./events/serial');
     require('./events/parallel');
