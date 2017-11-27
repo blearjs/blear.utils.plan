@@ -404,23 +404,20 @@ var Plan = Events.extend({
             each(the[_taskList], function (index, task) {
                 task = the[_taskStart](index);
                 task.will().call(the.context, function (err, ret) {
-                    if (err) {
-                        the[_taskEnd](task, err);
-                        the[_taskError](task, err);
-
-                        if (!done) {
-                            the[_planEnd].call(the, err);
-                        }
-
-                        return;
-                    }
-
                     // 如果已有任务完成，则退出后续操作
                     if (done) {
                         return;
                     }
 
                     done = true;
+
+                    if (err) {
+                        the[_taskEnd](task, err);
+                        the[_taskError](task, err);
+                        the[_planEnd].call(the, err);
+                        return;
+                    }
+
                     the[_taskEnd](task, ret);
                     the[_taskSuccess](task, err, ret);
                     the[_planEnd].call(the, err, ret);
