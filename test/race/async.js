@@ -15,11 +15,11 @@ var asyncTaskify = utils.asyncTaskify;
 
 describe('异步', function () {
 
-    it('快的成功', function (done) {
+    it('快的成功: callback', function (done) {
         plan
             .task(function (next) {
                 setTimeout(function () {
-                    next(new Error('1'));
+                    next(null, 1);
                 }, 500);
             })
             .task(function (next) {
@@ -34,11 +34,11 @@ describe('异步', function () {
             });
     });
 
-    it('快的失败', function (done) {
+    it('快的失败: callback', function (done) {
         plan
             .task(function (next) {
                 setTimeout(function () {
-                    next(null, 1);
+                    next(new Error('1'));
                 }, 500);
             })
             .task(function (next) {
@@ -49,6 +49,63 @@ describe('异步', function () {
             .race()
             .catch(function (err) {
                 expect(err.message).toBe('2');
+                done();
+            });
+    });
+
+    it('快的成功: promise', function (done) {
+        plan
+            .taskPromise(function () {
+                return new Promise(function (resolve, reject) {
+                    setTimeout(resolve, 500, 1);
+                });
+            })
+            .taskPromise(function () {
+                return new Promise(function (resolve, reject) {
+                    setTimeout(resolve, 100, 2);
+                });
+            })
+            .race()
+            .try(function (ret) {
+                expect(ret).toBe(2);
+                done();
+            });
+    });
+
+    it('快的失败: promise', function (done) {
+        plan
+            .taskPromise(function () {
+                return new Promise(function (resolve, reject) {
+                    setTimeout(reject, 500, new Error('1'));
+                });
+            })
+            .taskPromise(function () {
+                return new Promise(function (resolve, reject) {
+                    setTimeout(reject, 100, new Error('2'));
+                });
+            })
+            .race()
+            .catch(function (err) {
+                expect(err.message).toBe('2');
+                done();
+            });
+    });
+
+    it('快的成功: promise 与 callback', function (done) {
+        plan
+            .taskPromise(function () {
+                return new Promise(function (resolve, reject) {
+                    setTimeout(resolve, 500, 1);
+                });
+            })
+            .task(function (next) {
+                setTimeout(function () {
+                    next(null, 2);
+                }, 100);
+            })
+            .race()
+            .try(function (ret) {
+                expect(ret).toBe(2);
                 done();
             });
     });
