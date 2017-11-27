@@ -396,6 +396,64 @@ var Plan = Events.extend({
     },
 
     /**
+     * 最快执行
+     * @param [callback] {Function} 执行完回调
+     * @returns {Plan}
+     */
+    any: function (callback) {
+        var the = this;
+
+        if (!the.length) {
+            return the;
+        }
+
+        if (isFunction(callback)) {
+            the[_allCallbackList].push(callback);
+        }
+
+        if (the[_state] > STATE_READY) {
+            return the;
+        }
+
+        the[_state] = STATE_STARTED;
+        nextTick(function () {
+            var doneLength = 0;
+            var success = false;
+            the[_planStart]();
+            each(the[_taskList], function (index, task) {
+                task = the[_taskStart](index);
+                task.will().call(the.context, function (err, ret) {
+                    doneLength++;
+
+                    if (err) {
+                        the[_taskEnd](task, err);
+                        the[_taskError](task, err);
+
+                        if (doneLength === the.length) {
+                            the[_planEnd].call(the, err);
+                        }
+
+                        return;
+                    }
+
+                    // 如果已有任务成功，则退出后续操作
+                    if (success) {
+                        return;
+                    }
+
+                    success = true;
+                    the[_taskEnd](task, ret);
+                    the[_taskSuccess](task, err, ret);
+                    the[_planEnd].call(the, err, ret);
+                });
+                task.will = null;
+            });
+        });
+
+        return the;
+    },
+
+    /**
      * try 计划
      * @param callback {Function} 成功回调
      * @returns {Plan}
