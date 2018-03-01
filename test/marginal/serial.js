@@ -75,16 +75,16 @@ describe('串行', function () {
             .task('a', function (next) {
                 setTimeout(function () {
                     next(null, 1);
-                }, 1);
+                }, 10);
                 setTimeout(function () {
                     next(null, 2);
-                }, 2);
+                }, 20);
             })
             .serial(function (err, _ret) {
                 ret1 = _ret;
             });
 
-        plan.wait(10).serial(function () {
+        plan.wait(50).serial(function () {
             expect(ret1).toBe(1);
             done();
         });

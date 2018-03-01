@@ -212,7 +212,7 @@ var Plan = Events.extend({
     },
 
     /**
-     * 串行执行
+     * 串行执行，任务依次执行，全部任务都成功，则计划成功，否则计划失败
      * @param [callback] {Function} 执行完回调
      * @returns {Plan}
      */
@@ -277,7 +277,7 @@ var Plan = Events.extend({
     },
 
     /**
-     * 并行执行
+     * 并行执行，任务同时执行，全部任务都成功，则计划成功，否则计划失败
      * @param [callback] {Function} 执行完回调
      * @returns {Plan}
      */
@@ -348,14 +348,14 @@ var Plan = Events.extend({
     },
 
     /**
-     * 竞速执行
+     * 竞速执行，任务同时执行，取最快执行的完成结果，无论成功还是失败
      * @param [callback] {Function} 执行完回调
      * @returns {Plan}
      */
     race: function (callback) {
         var the = this;
 
-        if (!the.length) {
+        if (the[_state] > STATE_READY) {
             return the;
         }
 
@@ -363,14 +363,17 @@ var Plan = Events.extend({
             the[_allCallbackList].push(callback);
         }
 
-        if (the[_state] > STATE_READY) {
-            return the;
-        }
-
         the[_state] = STATE_STARTED;
+        the[_planStart]();
+
         nextTick(function () {
+            if (!the.length) {
+                the[_planEnd]();
+                return the;
+            }
+
             var done = false;
-            the[_planStart]();
+
             each(the[_taskList], function (index, task) {
                 task = the[_taskStart](index);
                 task.will().call(the.context, function (err, ret) {
@@ -400,14 +403,14 @@ var Plan = Events.extend({
     },
 
     /**
-     * 最快执行
+     * 尽快执行，任务同时执行，取最快的成功结果，如果都失败，则取最慢的结果
      * @param [callback] {Function} 执行完回调
      * @returns {Plan}
      */
     any: function (callback) {
         var the = this;
 
-        if (!the.length) {
+        if (the[_state] > STATE_READY) {
             return the;
         }
 
@@ -415,15 +418,18 @@ var Plan = Events.extend({
             the[_allCallbackList].push(callback);
         }
 
-        if (the[_state] > STATE_READY) {
-            return the;
-        }
-
         the[_state] = STATE_STARTED;
+        the[_planStart]();
+
         nextTick(function () {
+            if (!the.length) {
+                the[_planEnd]();
+                return the;
+            }
+
             var doneLength = 0;
             var success = false;
-            the[_planStart]();
+
             each(the[_taskList], function (index, task) {
                 task = the[_taskStart](index);
                 task.will().call(the.context, function (err, ret) {

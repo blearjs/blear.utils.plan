@@ -51,6 +51,7 @@
 describe('边界', function () {
     require('./marginal/serial');
     require('./marginal/parallel');
-    // require('./marginal/promise');
-    // require('./marginal/race');
+    require('./marginal/promise');
+    require('./marginal/race');
+    require('./marginal/any');
 });

@@ -10,11 +10,11 @@
 var expect = require('chai-jasmine').expect;
 var plan = require('../../src/index');
 
-describe('竞速', function () {
+describe('尽快', function () {
 
     it('空任务', function (done) {
         var called = false;
-        plan.each().race(function () {
+        plan.each().any(function () {
             called = true;
         });
         plan.wait(10).serial(function () {
