@@ -219,21 +219,22 @@ var Plan = Events.extend({
     serial: function (callback) {
         var the = this;
 
-        if (!the.length) {
-            return the;
-        }
-
-        if (isFunction(callback)) {
-            the[_allCallbackList].push(callback);
-        }
-
         if (the[_state] > STATE_READY) {
             return the;
         }
 
         the[_state] = STATE_STARTED;
+        the[_planStart]();
+
+        if (isFunction(callback)) {
+            the[_allCallbackList].push(callback);
+        }
+
         nextTick(function () {
-            the[_planStart]();
+            if (!the.length) {
+                the[_planEnd]();
+                return the;
+            }
 
             var start = function (lastRet) {
                 // 从计划列表中取出将要执行的计划

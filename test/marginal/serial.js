@@ -47,7 +47,7 @@ describe('串行', function () {
     it('重复计划', function (done) {
         var ret1;
         var ret2;
-        global.DEBUG = false;
+
         plan
             .taskSync(function () {
                 return 1;
@@ -63,8 +63,7 @@ describe('串行', function () {
             .wait(10)
             .taskSync(function () {
                 expect(ret1).toBe(1);
-                expect(ret2).toBe(1);
-                global.DEBUG = true;
+                expect(ret2).toBe(undefined);
             })
             .serial(done);
     });
@@ -117,7 +116,7 @@ describe('串行', function () {
             called = true;
         });
         plan.wait(10).taskSync(function () {
-            expect(called).toBeFalsy();
+            expect(called).toBeTruthy();
         }).serial(done);
     });
 
@@ -127,7 +126,7 @@ describe('串行', function () {
             called = true;
         });
         plan.wait(10).serial(function () {
-            expect(called).toBeFalsy();
+            expect(called).toBeTruthy();
             done();
         });
     });
@@ -138,10 +137,23 @@ describe('串行', function () {
             called = true;
         });
         plan.wait(10).serial(function () {
-            expect(called).toBeFalsy();
+            expect(called).toBeTruthy();
             done();
         });
     });
 
+    it('空任务', function (done) {
+        var called = false;
+        plan.each([], function (index, item, next) {
+            next();
+        }).serial(function () {
+            called = true;
+        });
+
+        plan.wait(10).serial(function () {
+            expect(called).toBeTruthy();
+            done();
+        });
+    });
 });
 
