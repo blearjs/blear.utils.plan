@@ -284,25 +284,28 @@ var Plan = Events.extend({
     parallel: function (callback) {
         var the = this;
 
-        if (!the.length) {
-            return the;
-        }
-
-        if (isFunction(callback)) {
-            the[_allCallbackList].push(callback);
-        }
 
         if (the[_state] > STATE_READY) {
             return the;
         }
 
         the[_state] = STATE_STARTED;
+        the[_planStart]();
+
+        if (isFunction(callback)) {
+            the[_allCallbackList].push(callback);
+        }
+
         nextTick(function () {
+            if (!the.length) {
+                the[_planEnd]();
+                return the;
+            }
+
             // 合并的结果
             var combinedRet = [];
             var successLength = 0;
 
-            the[_planStart]();
             each(the[_taskList], function (index, task) {
                 // 如果有任务已经出错
                 if (the.error) {

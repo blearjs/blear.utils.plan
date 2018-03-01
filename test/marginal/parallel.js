@@ -65,14 +65,12 @@ describe('并行', function () {
             .wait(10)
             .taskSync(function () {
                 expect(ret1).toBe(1);
-                expect(ret2).toBe(1);
+                expect(ret2).toBe(undefined);
             })
             .serial(done);
     });
 
     it('任务重复完成', function (done) {
-        global.DEBUG = false;
-
         var ret1;
 
         plan
@@ -88,13 +86,10 @@ describe('并行', function () {
                 ret1 = _ret;
             });
 
-        plan
-            .wait(100)
-            .taskSync(function () {
-                expect(ret1).toBe(1);
-                global.DEBUG = true;
-            })
-            .serial(done);
+        plan.wait(10).serial(function () {
+            expect(ret1).toBe(1);
+            done();
+        });
     });
 
     it('任务开始之后插任务', function (done) {
@@ -142,7 +137,7 @@ describe('并行', function () {
             called = true;
         });
         plan.wait(10).taskSync(function () {
-            expect(called).toBeFalsy();
+            expect(called).toBeTruthy();
         }).serial(done);
     });
 
@@ -152,7 +147,7 @@ describe('并行', function () {
             called = true;
         });
         plan.wait(10).serial(function () {
-            expect(called).toBeFalsy();
+            expect(called).toBeTruthy();
             done();
         });
     });
@@ -163,7 +158,7 @@ describe('并行', function () {
             called = true;
         });
         plan.wait(10).serial(function () {
-            expect(called).toBeFalsy();
+            expect(called).toBeTruthy();
             done();
         });
     });

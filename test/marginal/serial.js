@@ -84,12 +84,10 @@ describe('串行', function () {
                 ret1 = _ret;
             });
 
-        plan
-            .wait(100)
-            .taskSync(function () {
-                expect(ret1).toBe(1);
-            })
-            .serial(done);
+        plan.wait(10).serial(function () {
+            expect(ret1).toBe(1);
+            done();
+        });
     });
 
     it('任务开始之后插任务', function (done) {
@@ -136,20 +134,6 @@ describe('串行', function () {
         plan.eachSync().serial(function () {
             called = true;
         });
-        plan.wait(10).serial(function () {
-            expect(called).toBeTruthy();
-            done();
-        });
-    });
-
-    it('空任务', function (done) {
-        var called = false;
-        plan.each([], function (index, item, next) {
-            next();
-        }).serial(function () {
-            called = true;
-        });
-
         plan.wait(10).serial(function () {
             expect(called).toBeTruthy();
             done();
