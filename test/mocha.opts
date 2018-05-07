@@ -1,3 +1,4 @@
 --reporter progress
 --ui bdd
 --timeout 0
+--recursive
