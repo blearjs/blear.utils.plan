@@ -8,5 +8,7 @@
 'use strict';
 
 describe('index', function () {
+    it('empty', function () {
 
+    });
 });
