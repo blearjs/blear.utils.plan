@@ -7,6 +7,8 @@
 
 'use strict';
 
+var access = require('blear.utils.access');
+
 var Plan = require('./plan');
 
 
@@ -76,3 +78,17 @@ exports.eachSync = autoInstantiate('eachSync');
  * @param fn
  */
 exports.eachPromise = autoInstantiate('eachPromise');
+
+
+/**
+ * 将 callback 转换为 task
+ * @param task {Function} callback 函数
+ * @returns {function(*=): *}
+ */
+exports.taskify = function (task/*arguments*/) {
+    var args = access.args(arguments).slice(1);
+    return function (next) {
+        args.push(next);
+        return task.apply(null, args);
+    };
+};

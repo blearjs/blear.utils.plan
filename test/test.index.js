@@ -7,8 +7,20 @@
 
 'use strict';
 
-describe('index', function () {
-    it('empty', function () {
+var plan = require('../src/index');
 
+describe('blear.utils.plan', function () {
+
+    it('.taskify', function (done) {
+        var async = function (a, b, callback) {
+            callback(null, a + b);
+        };
+
+        plan.taskify(async, 1, 2)(function (err, ret) {
+            expect(err).toEqual(null);
+            expect(ret).toEqual(3);
+            done();
+        });
     });
+
 });
