@@ -1,6 +1,6 @@
 {
   "name": "blear.utils.plan",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "（同步、异步、promise）任务的串、并行计划（流程控制）",
   "scripts": {
     "live": "browser-sync start --config bs-config.js",
